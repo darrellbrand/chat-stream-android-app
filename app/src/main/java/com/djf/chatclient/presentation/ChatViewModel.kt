@@ -7,6 +7,7 @@ import com.djf.chatclient.remote.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.api.models.QueryUsersRequest
+import io.getstream.chat.android.client.api.models.WatchChannelRequest
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.User
@@ -60,6 +61,7 @@ class ChatViewModel @Inject constructor(val apiService: ApiService, val chatClie
             filter = filter,
             offset = 0,
             limit = 30,
+            presence = true
             // querySort = sort// You can adjust the limit as needed
         )
         // Define the list of user IDs for the channel
@@ -90,6 +92,7 @@ class ChatViewModel @Inject constructor(val apiService: ApiService, val chatClie
             val addMemberResult = addMemberRequest.await()
             val updatePartialResult = updatePartialRequest.await()
             val watchChannelRequest: Deferred<Result<Channel>> = async {
+
                 channelClient.watch().execute()
             }
             val watchChannelResult = watchChannelRequest.await()

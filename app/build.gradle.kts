@@ -1,0 +1,103 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+}
+val localProperties = Properties()
+localProperties.load(FileInputStream(rootProject.file("local.properties")))
+android {
+    namespace = "com.djf.chatclient"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.djf.chatclient"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+        buildConfigField("String", "API_KEY", localProperties["apiKey"].toString())
+        buildConfigField("String", "X_API_KEY", localProperties["x-api-key"].toString())
+        buildConfigField("String", "API_KEY_VALUE", localProperties["x-api-key-value"].toString())
+        buildConfigField("String", "X_BASIC_AUTH", localProperties["x-basic-auth"].toString())
+        buildFeatures {
+            buildConfig = true
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+dependencies {
+    implementation(libs.androidx.ui.text.google.fonts)
+    val stream_version = "6.5.0"
+//retrofit
+    implementation(libs.retrofit)
+    //gson
+    implementation(libs.gson)
+    //dagger
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.retrofit2.converter.gson)
+    //stream
+    implementation(libs.stream.chat.android.compose)
+    implementation(libs.stream.chat.android.offline)
+    //google font
+    implementation(libs.androidx.ui.text.google.fonts)
+    // implementation (libs.play.services.base)
+    //  implementation (libs.play.services.oss.licenses)
+    //
+//standard
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+}
+kapt {
+    correctErrorTypes = true
+}

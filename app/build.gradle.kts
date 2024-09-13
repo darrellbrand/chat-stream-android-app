@@ -78,9 +78,9 @@ dependencies {
     implementation(libs.stream.chat.android.offline)
     //google font
     implementation(libs.androidx.ui.text.google.fonts)
-    // implementation (libs.play.services.base)
-    //  implementation (libs.play.services.oss.licenses)
-    //
+
+    //coil
+    implementation(libs.coil.compose)
 //standard
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

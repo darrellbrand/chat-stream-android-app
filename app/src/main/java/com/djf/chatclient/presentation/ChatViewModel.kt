@@ -39,14 +39,19 @@ class ChatViewModel @Inject constructor(
     private val _token = MutableStateFlow("")
     var token = _token.asStateFlow()
 
-    fun connectClient(name: String) {
+    fun connectClient(name: String, image: String?) {
         viewModelScope.launch {
             try {
+                val imageIn = if (image?.isNotEmpty() == true) {
+                    image
+                } else {
+                    "https://bit.ly/2TIt8NR"
+                }
                 _token.value = apiService.initUser(headerValue = headerValue, email = name).token
                 val user = User(
                     name = name,
                     id = name,
-                    image = "https://bit.ly/2TIt8NR",
+                    image = imageIn,
                 )
                 chatClient.connectUser(
                     user = user, token = token.value

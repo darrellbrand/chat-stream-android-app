@@ -5,6 +5,18 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import io.getstream.chat.android.compose.ui.messages.MessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
@@ -14,18 +26,23 @@ class MessageActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // 1 - Load the ID of the selected channel
         val channelId = intent.getStringExtra(KEY_CHANNEL_ID)!!
-
+        WindowCompat.setDecorFitsSystemWindows(window,false)
+        //enableEdgeToEdge()
         // 2 - Add the MessagesScreen to your UI
         setContent {
             ChatTheme {
-                MessagesScreen(
-                    viewModelFactory = MessagesViewModelFactory(
-                        context = this,
-                        channelId = channelId,
-                        messageLimit = 30
-                    ),
-                    onBackPressed = { finish() }
-                )
+                Scaffold {
+                    Box(modifier = Modifier.padding(it).imePadding()) {
+                        MessagesScreen(
+                            viewModelFactory = MessagesViewModelFactory(
+                                context = LocalContext.current,
+                                channelId = channelId,
+                                messageLimit = 30,
+                            ),
+                            onBackPressed = { finish() },
+                        )
+                    }
+                }
             }
         }
     }

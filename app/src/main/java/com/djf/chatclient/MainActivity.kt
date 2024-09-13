@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.djf.chatclient.presentation.ChatViewModel
+import com.djf.chatclient.presentation.screens.LoginScreen
 import com.djf.chatclient.presentation.screens.MessageActivity
 import com.djf.chatclient.presentation.screens.UsersActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -97,22 +98,3 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     Text("rad")
 }
-
-@Composable
-fun LoginScreen(onClick: (name: String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("name") }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        TextField(name, { name = it })
-        Button(onClick = {
-            onClick(name)
-        }) {
-            Text("Login")
-        }
-    }
-
-}
-

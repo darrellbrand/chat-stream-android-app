@@ -17,10 +17,12 @@ import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -53,10 +55,11 @@ class ChatViewModel @Inject constructor(
                     id = name,
                     image = imageIn,
                 )
-                chatClient.connectUser(
-                    user = user, token = token.value
-                ).enqueue()
-
+                withContext(Dispatchers.Default) {
+                    chatClient.connectUser(
+                        user = user, token = token.value
+                    ).execute()
+                }
             } catch (e: Exception) {
                 println(e.printStackTrace())
             }
@@ -72,46 +75,41 @@ class ChatViewModel @Inject constructor(
             // querySort = sort// You can adjust the limit as needed
         )
         viewModelScope.launch {
-            val queryPromise: Deferred<Result<List<User>>> = async {
+            val queryPromise = withContext(Dispatchers.Default) {
                 chatClient.queryUsers(request).execute()
             }
-            val queryResult: Result<List<User>> = queryPromise.await()
-            _userList.value = queryResult.getOrNull()
-                ?.filter { it.online && it.id != chatClient.clientState.user.value?.id }
-                ?: emptyList()
+            val queryResult = queryPromise.getOrNull() ?: emptyList()
+            _userList.value = queryResult
+                .filter { it.online && it.id != chatClient.clientState.user.value?.id }
         }
-
     }
 
     fun createChannel(user: User) {
         val localUserId = chatClient.clientState.user.value?.id ?: "INVALID OR NULL"
-        val otherUser = user.id
+        val otherUserId = user.id
         val memberList = listOf(user.id, localUserId)
         viewModelScope.launch {
-            val createChannelRequest = async {
+            val createChannelRequest = withContext(Dispatchers.Default) {
                 chatClient.createChannel(
                     "messaging", channelId = "",
                     memberIds = memberList, extraData = emptyMap()//mapOf("name" to otherUser)
-                ).execute()
+                ).execute().getOrNull() ?: Channel()
             }
-            val createChannelResult = createChannelRequest.await()
-
-            val addMemberRequest: Deferred<Result<Channel>?> = async {
+            withContext(Dispatchers.Default) {
                 chatClient.addMembers(
-                    memberIds = listOf(user.id, localUserId),
+                    memberIds = listOf(otherUserId, localUserId),
                     channelId = "",
                     channelType = "messaging"
-                ).execute()
-            }
-            val addMemberResult = addMemberRequest.await()
-            val channel = createChannelResult.getOrNull() ?: Channel()
-            val watchChannelRequest: Deferred<Result<Channel>> = async {
+                ).execute().getOrNull()
                 val channelClient =
-                    channel.let { chatClient.channel(channelType = it.type, channelId = it.id) }
+                    createChannelRequest.let {
+                        chatClient.channel(
+                            channelType = it.type,
+                            channelId = it.id
+                        )
+                    }
                 channelClient.watch().execute()
             }
-            val watchChannelResult = watchChannelRequest.await()
-
         }
     }
 }

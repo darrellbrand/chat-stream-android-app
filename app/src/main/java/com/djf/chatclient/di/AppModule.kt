@@ -25,7 +25,7 @@ class AppModule {
         fun provideApplicationContext(@ApplicationContext context: Context): Context {
             return context
         }
-
+        @Singleton
         @Provides
         fun provideChatClient(applicationContext: Context): ChatClient {
             val offlinePluginFactory = StreamOfflinePluginFactory(appContext = applicationContext)

@@ -1,4 +1,4 @@
-package com.djf.chatclient.screens
+package com.djf.chatclient.presentation.screens
 
 import android.content.Context
 import android.content.Intent
@@ -9,7 +9,7 @@ import io.getstream.chat.android.compose.ui.messages.MessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 
-class ChannelActivity : ComponentActivity() {
+class MessageActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 1 - Load the ID of the selected channel
@@ -35,7 +35,7 @@ class ChannelActivity : ComponentActivity() {
         private const val KEY_CHANNEL_ID = "channelId"
 
         fun getIntent(context: Context, channelId: String): Intent {
-            return Intent(context, ChannelActivity::class.java).apply {
+            return Intent(context, MessageActivity::class.java).apply {
                 putExtra(KEY_CHANNEL_ID, channelId)
             }
         }

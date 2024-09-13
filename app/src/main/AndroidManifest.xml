@@ -26,9 +26,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".screens.ChannelActivity"
+            android:name=".presentation.screens.MessageActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:theme="@style/Theme.ChatClient">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".presentation.screens.UsersActivity"
+            android:exported="true"
             android:theme="@style/Theme.ChatClient">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />

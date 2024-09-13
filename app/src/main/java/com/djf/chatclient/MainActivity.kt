@@ -1,5 +1,7 @@
 package com.djf.chatclient
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,7 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.djf.chatclient.presentation.ChatViewModel
-import com.djf.chatclient.screens.ChannelActivity
+import com.djf.chatclient.presentation.screens.MessageActivity
+import com.djf.chatclient.presentation.screens.UsersActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
 import io.getstream.chat.android.compose.ui.channels.SearchMode
@@ -46,7 +49,6 @@ class MainActivity : ComponentActivity() {
                     val clientInitialisationState by viewModel.chatClient.clientState.initializationState.collectAsStateWithLifecycle()
                     when (clientInitialisationState) {
                         InitializationState.COMPLETE -> {
-                            viewModel.createInitialChannel()
                             Box(modifier = Modifier.padding(innerPadding))
                             {
                                 ChannelsScreen(
@@ -55,7 +57,8 @@ class MainActivity : ComponentActivity() {
                                     onChannelClick = { channel ->
                                         launchMessages(channel)
                                     },
-                                    onBackPressed = { finish() }
+                                    onBackPressed = { finish() },
+                                    onHeaderActionClick = { launchUsers() }
                                 )
                             }
                         }
@@ -74,7 +77,17 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun launchMessages(channel: Channel) {
-        startActivity(ChannelActivity.getIntent(this, channel.cid))
+        startActivity(MessageActivity.getIntent(this, channel.cid))
+    }
+
+    private fun launchUsers() {
+        startActivity(UsersActivity.getIntent(this))
+    }
+    // 3 - Create an intent to start this Activity, with a given channelId
+    companion object {
+        fun getIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java)
+        }
     }
 }
 

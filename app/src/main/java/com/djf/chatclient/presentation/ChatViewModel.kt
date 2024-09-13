@@ -1,5 +1,7 @@
 package com.djf.chatclient.presentation
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.djf.chatclient.BuildConfig
@@ -22,17 +24,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-private const val apiHeaderValue = BuildConfig.API_KEY_VALUE
-
 @HiltViewModel
-class ChatViewModel @Inject constructor(val apiService: ApiService, val chatClient: ChatClient) :
-    ViewModel() {
+class ChatViewModel @Inject constructor(
+    val apiService: ApiService,
+    val chatClient: ChatClient,
+) : ViewModel() {
     private val headerValue = BuildConfig.API_KEY_VALUE
     private val _name = MutableStateFlow("")
     var name = _name.asStateFlow()
 
+    private val _userList: MutableStateFlow<List<User>> = MutableStateFlow(emptyList())
+    var userList = _userList.asStateFlow()
+
     private val _token = MutableStateFlow("")
     var token = _token.asStateFlow()
+
     fun connectClient(name: String) {
         viewModelScope.launch {
             try {
@@ -43,8 +49,7 @@ class ChatViewModel @Inject constructor(val apiService: ApiService, val chatClie
                     image = "https://bit.ly/2TIt8NR",
                 )
                 chatClient.connectUser(
-                    user = user,
-                    token = token.value
+                    user = user, token = token.value
                 ).enqueue()
 
             } catch (e: Exception) {
@@ -53,50 +58,55 @@ class ChatViewModel @Inject constructor(val apiService: ApiService, val chatClie
         }
     }
 
-    fun createInitialChannel() {
+    fun getUsers() {
         // No filters, so this will query all users
         val filter = Filters.neutral()  // Neutral filter queries all users
         // Query users with pagination (limit 30)
         val request = QueryUsersRequest(
-            filter = filter,
-            offset = 0,
-            limit = 30,
-            presence = true
+            filter = filter, offset = 0, limit = 30, presence = true
             // querySort = sort// You can adjust the limit as needed
         )
-        // Define the list of user IDs for the channel
-        val members = emptyList<String>().toMutableList()
         viewModelScope.launch {
             val queryPromise: Deferred<Result<List<User>>> = async {
                 chatClient.queryUsers(request).execute()
             }
             val queryResult: Result<List<User>> = queryPromise.await()
+            _userList.value = queryResult.getOrNull()
+                ?.filter { it.online && it.id != chatClient.clientState.user.value?.id }
+                ?: emptyList()
+        }
 
-            val addMemberRequest: Deferred<Result<Channel>> = async {
-                val retList = mutableListOf<String>()
-                queryResult.getOrNull()?.forEach {
-                    retList.add(it.id)
-                }
+    }
+
+    fun createChannel(user: User) {
+        val localUserId = chatClient.clientState.user.value?.id ?: "INVALID OR NULL"
+        val otherUser = user.id
+        val memberList = listOf(user.id, localUserId)
+        viewModelScope.launch {
+            val createChannelRequest = async {
+                chatClient.createChannel(
+                    "messaging", channelId = "",
+                    memberIds = memberList, extraData = emptyMap()//mapOf("name" to otherUser)
+                ).execute()
+            }
+            val createChannelResult = createChannelRequest.await()
+
+            val addMemberRequest: Deferred<Result<Channel>?> = async {
                 chatClient.addMembers(
-                    memberIds = retList,
-                    channelId = "general",
+                    memberIds = listOf(user.id, localUserId),
+                    channelId = "",
                     channelType = "messaging"
                 ).execute()
             }
-            val channelClient =
-                chatClient.channel(channelType = "messaging", channelId = "general")
-            val updatePartialRequest: Deferred<Result<Channel>> = async {
-
-                channelClient.updatePartial(set = mapOf("name" to "general")).execute()
-            }
             val addMemberResult = addMemberRequest.await()
-            val updatePartialResult = updatePartialRequest.await()
+            val channel = createChannelResult.getOrNull() ?: Channel()
             val watchChannelRequest: Deferred<Result<Channel>> = async {
-
+                val channelClient =
+                    channel.let { chatClient.channel(channelType = it.type, channelId = it.id) }
                 channelClient.watch().execute()
             }
             val watchChannelResult = watchChannelRequest.await()
-        }
 
+        }
     }
 }

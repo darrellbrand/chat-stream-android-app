@@ -38,6 +38,12 @@ class ChatViewModel @Inject constructor(
     private val _userList: MutableStateFlow<List<User>> = MutableStateFlow(emptyList())
     var userList = _userList.asStateFlow()
 
+    private val _isNetworkError: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    var isNetworkError = _isNetworkError.asStateFlow()
+
+    fun setError(isError: Boolean) {
+        _isNetworkError.value = isError
+    }
 
     fun connectClient(name: String, image: String?) {
         viewModelScope.launch {
@@ -58,8 +64,10 @@ class ChatViewModel @Inject constructor(
                         user = user, token = token
                     ).execute()
                 }
+                setError(false)
             } catch (e: Exception) {
                 println(e.printStackTrace())
+                setError(true)
             }
         }
     }

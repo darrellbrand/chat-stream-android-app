@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -39,11 +40,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.djf.chatclient.R
 import com.djf.chatclient.avatarList
+import java.lang.Error
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LoginScreen(onClick: (name: String, image: String) -> Unit) {
+fun LoginScreen(onClick: (name: String, image: String) -> Unit, isError: Boolean) {
     var name by rememberSaveable { mutableStateOf("name") }
     var image by rememberSaveable { mutableStateOf("https://cdn.iconscout.com/icon/free/png-512/free-avatar-icon-download-in-svg-png-gif-file-formats--user-man-avatars-flat-icons-pack-people-456323.png?f=webp&w=256") }
     Box {
@@ -78,11 +80,13 @@ fun LoginScreen(onClick: (name: String, image: String) -> Unit) {
                     .fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(25.dp))
-            Button(onClick = {
-                onClick(name, image)
-            }, modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)) {
+            Button(
+                onClick = {
+                    onClick(name, image)
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            ) {
                 Text("Login")
             }
             Spacer(modifier = Modifier.height(25.dp))
@@ -111,7 +115,31 @@ fun LoginScreen(onClick: (name: String, image: String) -> Unit) {
                     }
                 }
             }
+            MyAlertDialog(isError = isError) { onClick(name, image) }
         }
     }
 }
-
+@Composable
+fun MyAlertDialog(isError: Boolean, onClick: () -> Unit) {
+    if (isError) { // 2
+        AlertDialog(
+            onDismissRequest = {
+                onClick()
+            },
+            title = { Text(text = "Server Connection Failed") },
+            text = { Text(text = "Can't connect to server. Please try Again") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onClick()
+                    }
+                ) {
+                    Text(
+                        text = "Confirm",
+                        color = Color.White
+                    )
+                }
+            }
+        )
+    }
+}

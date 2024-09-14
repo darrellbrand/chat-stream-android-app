@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Color.White) {
                     val clientInitialisationState by viewModel.chatClient.clientState.initializationState.collectAsStateWithLifecycle()
+                    val isNetworkError by viewModel.isNetworkError.collectAsStateWithLifecycle()
                     when (clientInitialisationState) {
                         InitializationState.COMPLETE -> {
 
@@ -84,6 +85,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
+
                         InitializationState.NOT_INITIALIZED -> {
                             Box(
                                 modifier = Modifier
@@ -92,6 +94,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 LoginScreen(
                                     viewModel::connectClient,
+                                    isNetworkError
                                 )
                             }
 

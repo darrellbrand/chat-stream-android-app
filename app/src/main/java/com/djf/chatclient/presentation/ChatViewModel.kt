@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    val apiService: ApiService,
+    private val apiService: ApiService,
     val chatClient: ChatClient,
 ) : ViewModel() {
     private val headerValue = BuildConfig.API_KEY_VALUE
@@ -38,8 +38,6 @@ class ChatViewModel @Inject constructor(
     private val _userList: MutableStateFlow<List<User>> = MutableStateFlow(emptyList())
     var userList = _userList.asStateFlow()
 
-    private val _token = MutableStateFlow("")
-    var token = _token.asStateFlow()
 
     fun connectClient(name: String, image: String?) {
         viewModelScope.launch {
@@ -49,7 +47,7 @@ class ChatViewModel @Inject constructor(
                 } else {
                     "https://bit.ly/2TIt8NR"
                 }
-                _token.value = apiService.initUser(headerValue = headerValue, email = name).token
+                val token = apiService.initUser(headerValue = headerValue, email = name).token
                 val user = User(
                     name = name,
                     id = name,
@@ -57,7 +55,7 @@ class ChatViewModel @Inject constructor(
                 )
                 withContext(Dispatchers.Default) {
                     chatClient.connectUser(
-                        user = user, token = token.value
+                        user = user, token = token
                     ).execute()
                 }
             } catch (e: Exception) {

@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,28 +40,18 @@ import io.getstream.chat.android.models.User
 fun UserList(userList: List<User>, block: (User) -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Image(
-            painter = painterResource(R.drawable.bitmap),
+            painter = painterResource(R.drawable.undraw_chatting_lt27),
             "",
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.size(100.dp),
             Alignment.Center,
             contentScale = ContentScale.FillBounds
         )
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize().background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Spacer(modifier = Modifier.height(15.dp))
-            Text(
-                "Online Users",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.displayMedium
-            )
-            Spacer(modifier = Modifier.height(5.dp))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -82,7 +73,6 @@ fun UserItem(user: User, block: (User) -> Unit) {
             .clickable { block(user) }
             .clip(RoundedCornerShape(5.dp))
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
             .padding(5.dp)
     ) {
         AsyncImage(
@@ -100,8 +90,9 @@ fun UserItem(user: User, block: (User) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(2 / 3f),
-            textAlign = TextAlign.Left
+            textAlign = TextAlign.Left,
         )
 
     }
+    HorizontalDivider()
 }

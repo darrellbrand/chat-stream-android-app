@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: ChatViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+      //  WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         setContent {
             ChatTheme {
@@ -90,7 +90,6 @@ class MainActivity : ComponentActivity() {
                             Box(
                                 modifier = Modifier
                                     .imePadding()
-                                    .consumeWindowInsets(it)
                             ) {
                                 LoginScreen(
                                     viewModel::connectClient,

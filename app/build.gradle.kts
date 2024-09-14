@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 val localProperties = Properties()
 localProperties.load(FileInputStream(rootProject.file("local.properties")))
@@ -64,7 +65,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
-    val stream_version = "6.5.0"
+
 //retrofit
     implementation(libs.retrofit)
     //gson
@@ -76,11 +77,24 @@ dependencies {
     //stream
     implementation(libs.stream.chat.android.compose)
     implementation(libs.stream.chat.android.offline)
+    implementation (libs.stream.android.push.firebase)
+
     //google font
     implementation(libs.androidx.ui.text.google.fonts)
 
     //coil
     implementation(libs.coil.compose)
+
+    //firebase
+    // Import the Firebase BoM
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation(libs.firebase.analytics)
+
+
 //standard
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

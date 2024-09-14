@@ -7,8 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
+import io.getstream.chat.android.client.notifications.handler.NotificationConfig
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
@@ -25,9 +27,15 @@ class AppModule {
         fun provideApplicationContext(@ApplicationContext context: Context): Context {
             return context
         }
+
         @Singleton
         @Provides
         fun provideChatClient(applicationContext: Context): ChatClient {
+
+            val notificationConfig = NotificationConfig(
+                pushNotificationsEnabled = true,
+                pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "providerName"))
+            )
             val offlinePluginFactory = StreamOfflinePluginFactory(appContext = applicationContext)
             val statePluginFactory =
                 StreamStatePluginFactory(
@@ -37,6 +45,7 @@ class AppModule {
 
             // 2 - Set up the client for API calls and with the plugin for offline storage
             return ChatClient.Builder(com.djf.chatclient.BuildConfig.API_KEY, applicationContext)
+                .notifications(notificationConfig)
                 .withPlugins(offlinePluginFactory, statePluginFactory)
                 .logLevel(ChatLogLevel.ALL) // Set to NOTHING in prod
                 .build()

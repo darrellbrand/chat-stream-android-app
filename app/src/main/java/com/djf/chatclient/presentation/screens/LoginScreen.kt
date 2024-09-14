@@ -32,7 +32,7 @@ fun LoginScreen(onClick: (name: String, image: String) -> Unit) {
         Image(
             painter = painterResource(R.drawable.bitmap),
             contentDescription = "",
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize(),
         )
         Column(

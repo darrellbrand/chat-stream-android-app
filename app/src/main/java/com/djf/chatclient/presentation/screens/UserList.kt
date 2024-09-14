@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -36,13 +37,13 @@ import io.getstream.chat.android.models.User
 
 @Composable
 fun UserList(userList: List<User>, block: (User) -> Unit) {
-    Box (modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Image(
             painter = painterResource(R.drawable.bitmap),
             "",
             modifier = Modifier.fillMaxSize(),
             Alignment.Center,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
         Column(
             modifier = Modifier
@@ -50,6 +51,7 @@ fun UserList(userList: List<User>, block: (User) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
+            Spacer(modifier = Modifier.height(15.dp))
             Text(
                 "Online Users",
                 modifier = Modifier
@@ -58,11 +60,10 @@ fun UserList(userList: List<User>, block: (User) -> Unit) {
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.displayMedium
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(5.dp)
             ) {
                 items(userList) {
                     UserItem(it, block)
@@ -74,13 +75,15 @@ fun UserList(userList: List<User>, block: (User) -> Unit) {
 
 @Composable
 fun UserItem(user: User, block: (User) -> Unit) {
-    HorizontalDivider(modifier = Modifier.padding(5.dp))
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .clickable { block(user) }
+            .clip(RoundedCornerShape(5.dp))
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(5.dp)
     ) {
         AsyncImage(
             model = user.image,
@@ -101,5 +104,4 @@ fun UserItem(user: User, block: (User) -> Unit) {
         )
 
     }
-    HorizontalDivider(modifier = Modifier.padding(5.dp))
 }

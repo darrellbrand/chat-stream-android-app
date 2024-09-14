@@ -44,7 +44,7 @@ class AppModule {
 
 
         @Provides
-        fun provideBaseUrl(): String = "http://10.0.2.2:8080/"
+        fun provideBaseUrl(): String = "https://chat-backend-latest.onrender.com"
 
         @Provides
         @Singleton

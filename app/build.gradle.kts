@@ -73,6 +73,7 @@ dependencies {
     //dagger
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation( libs.androidx.hilt.navigation.compose)
     implementation(libs.retrofit2.converter.gson)
     //stream
     implementation(libs.stream.chat.android.compose)

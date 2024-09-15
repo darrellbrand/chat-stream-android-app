@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,45 +42,13 @@ import io.getstream.chat.android.models.User
 
 @AndroidEntryPoint
 class UsersActivity : ComponentActivity() {
-    private val viewModel: ChatViewModel by viewModels()
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 2 - Add the MessagesScreen to your UI
         enableEdgeToEdge()
-        viewModel.getUsers()
         setContent {
-            val userList by viewModel.userList.collectAsStateWithLifecycle()
-            ChatTheme {
-                Scaffold(topBar = {
-                    TopAppBar(title = {
-                        Text(
-                            "Online Users",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }, navigationIcon = {
-                        IconButton(onClick = { onBackPressedDispatcher.onBackPressed() }) {
-                            Icon(
-                                imageVector = (Icons.AutoMirrored.Filled.ArrowBack),
-                                contentDescription = ""
-                            )
-                        }
-                    },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.White,
-                        ),
-                        modifier = Modifier.shadow(elevation = 8.dp)
-                    )
-                }) {
-                    Box(modifier = Modifier.padding(it)) {
-                        UserList(userList, ::createChannelLaunchMain)
-                    }
-                }
-            }
+            UserScreen(launchChannel = ::launchMain, onBackPress = onBackPress)
         }
     }
 
@@ -94,8 +63,6 @@ class UsersActivity : ComponentActivity() {
         startActivity(MainActivity.getIntent(this))
     }
 
-    private fun createChannelLaunchMain(user: User) {
-        viewModel.createChannel(user)
-        launchMain()
-    }
+
+    private val onBackPress = { onBackPressedDispatcher.onBackPressed() }
 }

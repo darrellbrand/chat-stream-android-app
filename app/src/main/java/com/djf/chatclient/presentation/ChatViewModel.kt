@@ -1,17 +1,21 @@
 package com.djf.chatclient.presentation
 
 import android.app.Application
+import android.bluetooth.BluetoothClass
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.djf.chatclient.BuildConfig
 import com.djf.chatclient.remote.ApiService
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.api.models.QueryUsersRequest
 import io.getstream.chat.android.client.api.models.WatchChannelRequest
 import io.getstream.chat.android.models.Channel
+import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.Filters
+import io.getstream.chat.android.models.PushProvider
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.result.Result
@@ -41,7 +45,7 @@ class ChatViewModel @Inject constructor(
     private val _isNetworkError: MutableStateFlow<Boolean> = MutableStateFlow(false)
     var isNetworkError = _isNetworkError.asStateFlow()
 
-    fun setError(isError: Boolean) {
+    private fun setError(isError: Boolean) {
         _isNetworkError.value = isError
     }
 
@@ -53,17 +57,19 @@ class ChatViewModel @Inject constructor(
                 } else {
                     "https://bit.ly/2TIt8NR"
                 }
-                val token = apiService.initUser(headerValue = headerValue, email = name).token
+                val initUserResult = async {
+                    apiService.initUser(headerValue = headerValue, email = name).token
+                }
+               val streamToken = initUserResult.await()
                 val user = User(
                     name = name,
                     id = name,
                     image = imageIn,
                 )
-                withContext(Dispatchers.Default) {
-                    chatClient.connectUser(
-                        user = user, token = token
-                    ).execute()
-                }
+                chatClient.connectUser(
+                    user = user, token = streamToken
+                ).execute()
+                getFireBaseToken()
                 setError(false)
             } catch (e: Exception) {
                 println(e.printStackTrace())
@@ -72,6 +78,36 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun getFireBaseToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            if (it.isSuccessful) {
+                println("CVM: got token")
+                addDevice(it.result)
+            } else {
+                println("CVM: token fail ${it.exception}")
+            }
+        }
+    }
+
+    private fun addDevice(firebaseToken : String) {
+        viewModelScope.launch {
+            val addDeviceResult = async {
+                chatClient.addDevice(
+                    Device(
+                        token = firebaseToken,
+                        pushProvider = PushProvider.FIREBASE,
+                        providerName = "basic-config",
+                    )
+                ).execute()
+            }.await()
+            if (addDeviceResult.isSuccess) {
+                println("CVM: addDevice Success")
+            } else {
+                println("CVM: addDevice fail ${addDeviceResult.errorOrNull()}")
+            }
+        }
+
+    }
     fun getUsers() {
         // No filters, so this will query all users
         val filter = Filters.neutral()  // Neutral filter queries all users

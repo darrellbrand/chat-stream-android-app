@@ -18,7 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.djf.chatclient.R
-import com.djf.chatclient.presentation.ChatViewModel
+import com.djf.chatclient.presentation.InitViewModel
+import com.djf.chatclient.presentation.UsersViewModel
 import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
 import io.getstream.chat.android.compose.ui.channels.SearchMode
 import io.getstream.chat.android.models.Channel
@@ -27,7 +28,7 @@ import io.getstream.chat.android.models.InitializationState
 
 @Composable
 fun MainScreen(
-    viewModel: ChatViewModel = hiltViewModel(),
+    viewModel: InitViewModel = hiltViewModel(),
     launchUsers: () -> Unit,
     launchMessages: (Channel) -> Unit,
     onBackPress: () -> Unit

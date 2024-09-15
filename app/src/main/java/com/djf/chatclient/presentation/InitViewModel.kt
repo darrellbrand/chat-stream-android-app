@@ -10,8 +10,8 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.PushProvider
 import io.getstream.chat.android.models.User
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -34,37 +34,29 @@ class InitViewModel @Inject constructor(
     fun connectClient(name: String, image: String?) {
         viewModelScope.launch {
             try {
-                val imageIn = if (image?.isNotEmpty() == true) {
-                    image
-                } else {
-                    "https://bit.ly/2TIt8NR"
-                }
-                val initUserResult = async {
-                    println("inituserresult")
-                    try {
-                        return@async apiService.initUser(
+                coroutineScope {
+                    val imageIn = if (image?.isNotEmpty() == true) {
+                        image
+                    } else {
+                        "https://bit.ly/2TIt8NR"
+                    }
+                    val initUserResult = async {
+                        apiService.initUser(
                             headerValue = headerValue, email = name
                         ).token
-                    } catch (e: Exception) {
-                        if (e is CancellationException) throw e
-                        println("${e.printStackTrace()} Nested")
                     }
-                    return@async ""
-
+                    val streamToken = initUserResult.await()
+                    val user = User(
+                        name = name,
+                        id = name,
+                        image = imageIn,
+                    )
+                    chatClient.connectUser(
+                        user = user, token = streamToken
+                    ).execute()
+                    getFireBaseToken()
+                    setError(false)
                 }
-                println("inituserresult + await")
-                val streamToken = initUserResult.await()
-                val user = User(
-                    name = name,
-                    id = name,
-                    image = imageIn,
-                )
-                println("inituserresult + await + connectuser")
-                chatClient.connectUser(
-                    user = user, token = streamToken
-                ).execute()
-                getFireBaseToken()
-                setError(false)
             } catch (e: Exception) {
                 println(e.printStackTrace())
                 setError(true)

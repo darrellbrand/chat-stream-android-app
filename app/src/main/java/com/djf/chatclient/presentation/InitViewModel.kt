@@ -10,11 +10,13 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.PushProvider
 import io.getstream.chat.android.models.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,8 +35,9 @@ class InitViewModel @Inject constructor(
 
     fun connectClient(name: String, image: String?) {
         viewModelScope.launch {
-            try {
-                coroutineScope {
+            withContext(Dispatchers.IO) {
+                try {
+
                     val imageIn = if (image?.isNotEmpty() == true) {
                         image
                     } else {
@@ -55,10 +58,10 @@ class InitViewModel @Inject constructor(
                     ).execute()
                     getFireBaseToken()
                     setError(false)
+                } catch (e: Exception) {
+                    println(e.printStackTrace())
+                    setError(true)
                 }
-            } catch (e: Exception) {
-                println(e.printStackTrace())
-                setError(true)
             }
         }
     }
@@ -76,7 +79,7 @@ class InitViewModel @Inject constructor(
 
     private fun addDevice(firebaseToken: String) {
         viewModelScope.launch {
-            val addDeviceResult = async {
+            val addDeviceResult = withContext(Dispatchers.IO) {
                 chatClient.addDevice(
                     Device(
                         token = firebaseToken,
@@ -84,13 +87,12 @@ class InitViewModel @Inject constructor(
                         providerName = "basic-config",
                     )
                 ).execute()
-            }.await()
+            }
             if (addDeviceResult.isSuccess) {
                 println("CVM: addDevice Success")
             } else {
                 println("CVM: addDevice fail ${addDeviceResult.errorOrNull()}")
             }
         }
-
     }
 }

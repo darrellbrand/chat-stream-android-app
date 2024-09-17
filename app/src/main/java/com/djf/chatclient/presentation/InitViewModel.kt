@@ -40,19 +40,18 @@ class InitViewModel @Inject constructor(
                     } else {
                         "https://bit.ly/2TIt8NR"
                     }
-                    val initUserResult = async {
+                    val initUserResult =
                         apiService.initUser(
                             headerValue = headerValue, email = name
                         ).token
-                    }
-                    val streamToken = initUserResult.await()
+
                     val user = User(
                         name = name,
                         id = name,
                         image = imageIn,
                     )
                     chatClient.connectUser(
-                        user = user, token = streamToken
+                        user = user, token = initUserResult
                     ).execute()
                     getFireBaseToken()
                     setError(false)

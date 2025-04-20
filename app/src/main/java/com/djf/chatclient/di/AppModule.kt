@@ -34,7 +34,7 @@ class AppModule {
 
             val notificationConfig = NotificationConfig(
                 pushNotificationsEnabled = true,
-                pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "basic-config"))
+                pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "basic-config", context = applicationContext))
             )
             val offlinePluginFactory = StreamOfflinePluginFactory(appContext = applicationContext)
             val statePluginFactory =
